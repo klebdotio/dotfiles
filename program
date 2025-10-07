@@ -1,0 +1,22 @@
+#!/bin/zsh
+#
+SESSION="Program"
+
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+	tmux attach -t "$SESSION"
+	exit 0
+fi
+
+tmux new-session -d -s "$SESSION" -n "neovim"
+
+tmux send-keys -t "$SESSION:0" 'nvim .' C-m
+
+
+tmux split-window -v -t "$SESSION:0"
+
+tmux resize-pane -D 10
+
+tmux attach-session -t "$SESSION"
+
+
+
