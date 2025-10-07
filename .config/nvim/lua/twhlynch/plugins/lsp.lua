@@ -12,17 +12,22 @@ return {
 	},
 
 	config = function()
+		local cmp = require("cmp")
+		local cmp_lsp = require("cmp_nvim_lsp")
 		-- stylua: ignore
+		local capabilities = vim.tbl_deep_extend("force", {}, vim.lsp.protocol.make_client_capabilities(), cmp_lsp.default_capabilities())
 
 		require("mason").setup()
 		require("mason-lspconfig").setup({
 			automatic_installation = false,
 			ensure_installed = {
 				"lua_ls",
+				"marksman",
 				"basedpyright",
 				"ruff",
 				"clangd",
 				"cmake",
+				"glsl_analyzer",
 				"jdtls",
 				"texlab",
 			},
@@ -70,6 +75,20 @@ return {
 					})
 				end,
 
+				["rust_analyzer"] = function()
+					local lspconfig = require("lspconfig")
+					lspconfig.rust_analyzer.setup({
+						capabilities = capabilities,
+						settings = {
+							["rust-analyzer"] = {
+								checkOnSave = {
+									command = "clippy",
+								},
+							},
+						},
+					})
+				end,
+
 				["clangd"] = function()
 					local lspconfig = require("lspconfig")
 					lspconfig.clangd.setup({
@@ -106,6 +125,9 @@ return {
 			end
 			return l.util.open_floating_preview(markdown_lines, "markdown", config)
 		end
+
+		local cmp_select = { behavior = cmp.SelectBehavior.Select }
+		vim.api.nvim_set_hl(0, "CmpNormal", {})
 
 		local autocmd = vim.api.nvim_create_autocmd
 		autocmd({ "BufEnter", "BufWinEnter" }, {
